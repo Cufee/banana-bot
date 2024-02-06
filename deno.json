@@ -8,6 +8,7 @@
     "discord": "npm:discord.js"
   },
   "unstable": [
+    "cron",
     "kv"
   ]
 }
