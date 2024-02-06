@@ -30,16 +30,20 @@ async function updateLeaderMember(
 }
 
 export async function syncLeaderRole(client: Client<boolean>) {
-  if (!leaderRole) {
-    console.error("No leader role ID provided");
-    return;
-  }
+  try {
+    if (!leaderRole) {
+      console.error("No leader role ID provided");
+      return;
+    }
 
-  const board = await leaderboard(1);
-  if (!board || board.length < 1) {
-    console.error("Could not find leader");
-    return;
-  }
+    const board = await leaderboard(1);
+    if (!board || board.length < 1) {
+      console.error("Could not find leader");
+      return;
+    }
 
-  await updateLeaderMember(client, board[0][0], leaderRole);
+    await updateLeaderMember(client, board[0][0], leaderRole);
+  } catch (error) {
+    console.error("Error while syncing leader role", error);
+  }
 }

@@ -27,7 +27,6 @@ client.on("ready", async (client) => {
     "Update banana leader",
     "0/5 * * * *",
     () => {
-      console.log("Updating banana leader");
       syncLeaderRole(client);
     },
   );
