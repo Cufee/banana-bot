@@ -104,7 +104,7 @@ client.on("interactionCreate", async (interaction) => {
     const leaderboardMessage = top
       .map(([user, bananas]) => {
         const tag = `**${users[user].displayName}**` || `<@${user}>`;
-        return `${tag} has ${bananas} bananas`;
+        return `${tag} has ${bananas} ${bananas == 1 ? "banana" : "bananas"}`;
       })
       .join("\n");
     await interaction.reply(leaderboardMessage);
