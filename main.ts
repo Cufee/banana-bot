@@ -60,7 +60,7 @@ client.on("interactionCreate", async (interaction) => {
     const bananasCount = 1;
     await giveBanana(user!.id, bananasCount);
     await interaction.reply(
-      `${emoji} ${user!.username} has been given ${bananasCount} ${
+      `${emoji} <@${user!.id}> has been given ${bananasCount} ${
         bananasCount == 1 ? "banana" : "bananas"
       }!`,
     );
@@ -90,6 +90,11 @@ client.on("interactionCreate", async (interaction) => {
 
   if (interaction.commandName === leaderboardCommand.name) {
     const top = await leaderboard();
+    if (top.length === 0) {
+      await interaction.reply("No bananas have been given yet!");
+      return;
+    }
+
     const ids = top.map(([id]) => id);
     const users = (await Promise.all(
       ids.map(async (id) => ({ [id]: await client.users.fetch(id) })),
