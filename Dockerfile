@@ -24,4 +24,4 @@ COPY . .
 RUN deno cache main.ts
 
 ENTRYPOINT ["/bin/deno"]
-CMD ["run", "--allow-read", "--allow-env", "--allow-net", "main.ts"]
+CMD ["task", "start"]
