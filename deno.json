@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "dev": "deno run --watch -A main.ts"
+  },
+  "imports": {
+    "std/": "https://deno.land/std@0.213.0/",
+    "discord": "npm:discord.js"
+  },
+  "unstable": [
+    "kv"
+  ]
+}
