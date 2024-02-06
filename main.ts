@@ -19,6 +19,11 @@ const bananaGiveCommand = new SlashCommandBuilder()
     option
       .setName("user")
       .setDescription("Who gets the banana?")
+  )
+  .addIntegerOption((option) =>
+    option
+      .setName("amount")
+      .setDescription("How many bananas do you want to give?")
   );
 
 const bananasSeeCommand = new SlashCommandBuilder()
@@ -57,7 +62,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    const bananasCount = 1;
+    const bananasCount = +(interaction.options.getInteger("amount") || 1);
     await giveBanana(user!.id, bananasCount);
     await interaction.reply(
       `${emoji} <@${user!.id}> has been given ${bananasCount} ${
