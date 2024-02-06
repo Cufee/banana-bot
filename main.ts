@@ -19,6 +19,7 @@ const bananaGiveCommand = new SlashCommandBuilder()
     option
       .setName("user")
       .setDescription("Who gets the banana?")
+      .setRequired(true)
   )
   .addIntegerOption((option) =>
     option
