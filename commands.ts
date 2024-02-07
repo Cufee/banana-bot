@@ -43,13 +43,15 @@ commands["nana"] = {
       return;
     }
 
+    await interaction.deferReply();
+
     const bananasCount = +(interaction.options.getInteger("amount") || 1);
     const absBananasCount = Math.abs(bananasCount);
 
     await giveBanana(user!.id, bananasCount);
     const unit = bananasCount < 0 ? "anti-banana" : "banana";
 
-    await interaction.reply(
+    await interaction.editReply(
       `${emoji} <@${user!.id}> has been given ${absBananasCount} ${
         absBananasCount == 1 ? unit : unit + "s"
       }!`,
@@ -69,10 +71,12 @@ commands["nanas"] = {
         .setDescription("Who's bananas do you want to see?")
     ),
   handler: async (interaction) => {
+    await interaction.deferReply();
+
     const user = interaction.options.getUser("user");
     if (!user || !user?.id) {
       const userBananas = await getUserBananas(interaction.user.id);
-      await interaction.reply(
+      await interaction.editReply(
         `${emoji} You have ${userBananas} ${
           userBananas == 1 ? "banana" : "bananas"
         }!`,
@@ -81,7 +85,7 @@ commands["nanas"] = {
     }
 
     const userBananas = await getUserBananas(user!.id);
-    await interaction.reply(
+    await interaction.editReply(
       `${emoji} ${user!.username} has ${userBananas} ${
         userBananas == 1 ? "banana" : "bananas"
       }!`,
@@ -163,16 +167,18 @@ commands["throw"] = {
       return;
     }
 
+    await interaction.deferReply();
+
     const bananaCount = await getUserBananas(interaction.user.id);
     if (bananaCount < 1) {
-      await interaction.reply(
+      await interaction.editReply(
         "You don't have any bananas to throw!",
       );
       return;
     }
 
     if (target.id === interaction.user.id) {
-      await interaction.reply(
+      await interaction.editReply(
         `<@${interaction.user.id}> threw a 🍌 at <@${interaction.user.id}>... :facepalm:`,
       );
       return;
@@ -181,7 +187,7 @@ commands["throw"] = {
     const willHit = await willThrowHit(interaction.user.id);
     await incrementUserThrows(interaction.user.id);
 
-    await interaction.reply(
+    await interaction.editReply(
       `<@${interaction.user.id}> threw a 🍌 at <@${target.id}> :drum:`,
     );
 
