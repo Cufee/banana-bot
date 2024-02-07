@@ -44,10 +44,14 @@ commands["nana"] = {
     }
 
     const bananasCount = +(interaction.options.getInteger("amount") || 1);
+    const absBananasCount = Math.abs(bananasCount);
+
     await giveBanana(user!.id, bananasCount);
+    const unit = bananasCount < 0 ? "anti-banana" : "banana";
+
     await interaction.reply(
-      `${emoji} <@${user!.id}> has been given ${bananasCount} ${
-        bananasCount == 1 ? "banana" : "bananas"
+      `${emoji} <@${user!.id}> has been given ${absBananasCount} ${
+        absBananasCount == 1 ? unit : unit + "s"
       }!`,
     );
     return;
@@ -118,8 +122,13 @@ commands["leaderboard"] = {
     const leaderboardPositions = top
       .filter(([id]) => !!users[id])
       .map(([user, bananas]) => {
+        const absBananas = Math.abs(bananas);
+        const unit = bananas < 0 ? "anti-banana" : "banana";
         const tag = `**${users[user]!.displayName}**` || `<@${user}>`;
-        return `${tag} has ${bananas} ${bananas == 1 ? "banana" : "bananas"}`;
+
+        return `${tag} has ${absBananas} ${
+          absBananas == 1 ? unit : unit + "s"
+        }`;
       });
 
     let message = `## :trophy: Banana Leaderboard :trophy:\n\n`;
