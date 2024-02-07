@@ -97,6 +97,7 @@ commands["leaderboard"] = {
       await interaction.reply("No bananas have been given yet!");
       return;
     }
+    await interaction.deferReply();
 
     const guild = await client.guilds.fetch(interaction.guildId!);
     const ids = top.map(([id]) => id);
@@ -129,6 +130,7 @@ commands["leaderboard"] = {
       }
       message += `${i + 1}. ${leaderboardPositions[i]}\n`;
     }
+
     await interaction.reply(message);
     return;
   },
