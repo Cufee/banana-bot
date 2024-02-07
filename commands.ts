@@ -114,14 +114,22 @@ commands["leaderboard"] = {
         {} as Record<string, User | null>,
       );
 
-    const leaderboardMessage = top
+    const leaderboardPositions = top
       .filter(([id]) => !!users[id])
       .map(([user, bananas]) => {
         const tag = `**${users[user]!.displayName}**` || `<@${user}>`;
         return `${tag} has ${bananas} ${bananas == 1 ? "banana" : "bananas"}`;
-      })
-      .join("\n");
-    await interaction.reply(leaderboardMessage);
+      });
+
+    let message = `## :trophy: Banana Leaderboard :trophy:\n\n`;
+    for (let i = 0; i < leaderboardPositions.length; i++) {
+      if (message.length + leaderboardPositions[i].length > 1900) {
+        message += `... and ${leaderboardPositions.length - i} more`;
+        break;
+      }
+      message += `${i + 1}. ${leaderboardPositions[i]}\n`;
+    }
+    await interaction.reply(message);
     return;
   },
 };
