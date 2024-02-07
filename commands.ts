@@ -194,7 +194,7 @@ commands["throw"] = {
         message += `\n:banana: The banana is gone!`;
       }
       await interaction.followUp(message);
-    }, 3000);
+    }, Math.random() * 3000);
     return;
   },
 };

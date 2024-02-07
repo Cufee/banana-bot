@@ -57,6 +57,8 @@ export async function syncLeaderRole(client: Client<boolean>) {
 
 export async function willThrowHit(userId: string) {
   const allThrows = (await getAllUserThrows()).filter((entry) => entry[1] > 0);
+  allThrows.sort((a, b) => b[1] - a[1]);
+
   let chance = 0.5; // 50%
   if (allThrows.slice(0, 3).find((entry) => entry[0] === userId)) {
     // User is in top 3
