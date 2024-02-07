@@ -100,12 +100,19 @@ commands["leaderboard"] = {
     await interaction.deferReply();
 
     const guild = await client.guilds.fetch(interaction.guildId!);
-    const members = await guild.members.fetch();
-    const users = members
-      .map((member) => ({ [member.id]: member.user }))
+    const ids = top.map(([id]) => id);
+    const users = (await Promise.all(
+      ids.map(async (id) => {
+        try {
+          return { [id]: await guild.members.fetch(id).then((m) => m.user) };
+        } catch (_) {
+          return { [id]: null };
+        }
+      }),
+    ))
       .reduce(
         (acc, user) => ({ ...acc, ...user }),
-        {} as Record<string, User>,
+        {} as Record<string, User | null>,
       );
 
     const leaderboardPositions = top
