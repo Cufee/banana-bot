@@ -3,8 +3,11 @@ import {
   ChatInputCommandInteraction,
   Client,
   SlashCommandBuilder,
+  User,
 } from "discord";
 import { getUserBananas, giveBanana, leaderboard } from "./database.ts";
+import { incrementUserThrows } from "./database.ts";
+import { willThrowHit } from "./functions.ts";
 
 interface Command {
   config: unknown;
@@ -19,6 +22,7 @@ export const commands: Record<string, Command> = {};
 
 commands["nana"] = {
   config: new SlashCommandBuilder()
+    .setDMPermission(false)
     .setName("nana")
     .setDescription("Gib banana")
     .addUserOption((option) =>
@@ -52,6 +56,7 @@ commands["nana"] = {
 
 commands["nanas"] = {
   config: new SlashCommandBuilder()
+    .setDMPermission(false)
     .setName("nanas")
     .setDescription("See how many bananas you have")
     .addUserOption((option) =>
@@ -83,6 +88,7 @@ commands["nanas"] = {
 
 commands["leaderboard"] = {
   config: new SlashCommandBuilder()
+    .setDMPermission(false)
     .setName("leaderboard")
     .setDescription("See who has the most bananas"),
   handler: async (interaction, client) => {
@@ -92,19 +98,93 @@ commands["leaderboard"] = {
       return;
     }
 
+    const guild = await client.guilds.fetch(interaction.guildId!);
     const ids = top.map(([id]) => id);
     const users = (await Promise.all(
-      ids.map(async (id) => ({ [id]: await client.users.fetch(id) })),
+      ids.map(async (id) => {
+        try {
+          return { [id]: await guild.members.fetch(id).then((m) => m.user) };
+        } catch (_) {
+          return { [id]: null };
+        }
+      }),
     ))
-      .reduce((acc, user) => ({ ...acc, ...user }), {});
+      .reduce(
+        (acc, user) => ({ ...acc, ...user }),
+        {} as Record<string, User | null>,
+      );
 
     const leaderboardMessage = top
+      .filter(([id]) => !!users[id])
       .map(([user, bananas]) => {
-        const tag = `**${users[user].displayName}**` || `<@${user}>`;
+        const tag = `**${users[user]!.displayName}**` || `<@${user}>`;
         return `${tag} has ${bananas} ${bananas == 1 ? "banana" : "bananas"}`;
       })
       .join("\n");
     await interaction.reply(leaderboardMessage);
+    return;
+  },
+};
+
+commands["throw"] = {
+  config: new SlashCommandBuilder()
+    .setDMPermission(false)
+    .setName("throw")
+    .setDescription("Throw a banana at someone")
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("Who do you want to throw a banana at?")
+        .setRequired(true)
+    ),
+  handler: async (interaction) => {
+    const target = interaction.options.getUser("user");
+    if (!target || !target?.id) {
+      await interaction.reply("You need to provide a target for your banana!");
+      return;
+    }
+
+    const bananaCount = await getUserBananas(interaction.user.id);
+    if (bananaCount < 1) {
+      await interaction.reply(
+        "You don't have any bananas to throw!",
+      );
+      return;
+    }
+
+    if (target.id === interaction.user.id) {
+      await interaction.reply(
+        `<@${interaction.user.id}> threw a 🍌 at <@${interaction.user.id}>... :facepalm:`,
+      );
+      return;
+    }
+
+    const willHit = await willThrowHit(interaction.user.id);
+    await incrementUserThrows(interaction.user.id);
+
+    await interaction.reply(
+      `<@${interaction.user.id}> threw a 🍌 at <@${target.id}> :drum:`,
+    );
+
+    setTimeout(async () => {
+      if (willHit) {
+        await interaction.followUp(
+          `:boom: <@${target.id}> was hit by the banana!`,
+        );
+        await giveBanana(interaction.user.id, -1);
+        await giveBanana(target.id, 1);
+        return;
+      }
+      // Missed
+      const bananaGone = Math.random() < 0.1;
+      const outcome = Math.random() < 0.5 ? "jumped over" : "dodged under";
+      let message = `:dash: <@${target.id}> ${outcome} the banana!`;
+      if (bananaGone) {
+        await giveBanana(interaction.user.id, -1);
+        message += `\n:banana: The banana is gone!`;
+      }
+      await interaction.followUp(message);
+    }, 3000);
     return;
   },
 };

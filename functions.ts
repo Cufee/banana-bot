@@ -1,5 +1,5 @@
 import { Client } from "discord";
-import { leaderboard } from "./database.ts";
+import { getAllUserThrows, leaderboard } from "./database.ts";
 
 export const leaderRole = Deno.env.get("BANANA_LEADER_ROLE_ID");
 
@@ -9,23 +9,30 @@ async function updateLeaderMember(
   roleId: string,
 ) {
   await client.guilds.cache.forEach(async (guild) => {
-    const role = guild.roles.cache.get(roleId!);
-    if (!role) {
-      console.error("Could not find role with ID", roleId);
-      return;
+    try {
+      const role = guild.roles.cache.get(roleId!);
+      if (!role) {
+        console.error("Could not find role with ID", roleId);
+        return;
+      }
+
+      role.members.forEach(async (member) => {
+        try {
+          await member.roles.remove(role);
+        } catch (_) {
+          // Ignore
+        }
+      });
+
+      try {
+        const member = await guild.members.fetch(leaderId);
+        await member.roles.add(role);
+      } catch (_) {
+        // Ignore
+      }
+    } catch (error) {
+      console.error("Error while updating leader role", error);
     }
-
-    role.members.forEach(async (member) => {
-      await member.roles.remove(role);
-    });
-
-    const member = await guild.members.fetch(leaderId);
-    if (!member) {
-      console.error("Could not find member with ID", leaderId);
-      return;
-    }
-
-    await member.roles.add(role);
   });
 }
 
@@ -46,4 +53,18 @@ export async function syncLeaderRole(client: Client<boolean>) {
   } catch (error) {
     console.error("Error while syncing leader role", error);
   }
+}
+
+export async function willThrowHit(userId: string) {
+  const allThrows = (await getAllUserThrows()).filter((entry) => entry[1] > 0);
+  let chance = 0.5; // 50%
+  if (allThrows.slice(0, 3).find((entry) => entry[0] === userId)) {
+    // User is in top 3
+    chance = 0.75; // 75%
+  }
+  if (allThrows.slice(-3).find((entry) => entry[0] === userId)) {
+    // User is in bottom 3
+    chance = 0.25; // 25%
+  }
+  return Math.random() < chance ? 1 : 0;
 }
