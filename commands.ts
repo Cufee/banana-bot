@@ -191,7 +191,7 @@ commands["throw"] = {
       let message = `:dash: <@${target.id}> ${outcome} the banana!`;
       if (bananaGone) {
         await giveBanana(interaction.user.id, -1);
-        message += `\n:banana: The banana is gone!`;
+        message += `\nThe :banana: is gone!`;
       }
       await interaction.followUp(message);
     }, Math.random() * 3000);
