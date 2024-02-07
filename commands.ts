@@ -186,7 +186,7 @@ commands["throw"] = {
         return;
       }
       // Missed
-      const bananaGone = Math.random() < 0.1;
+      const bananaGone = Math.random() < 0.25;
       const outcome = Math.random() < 0.5 ? "jumped over" : "dodged under";
       let message = `:dash: <@${target.id}> ${outcome} the banana!`;
       if (bananaGone) {
