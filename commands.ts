@@ -184,32 +184,26 @@ commands["throw"] = {
       return;
     }
 
-    const willHit = await willThrowHit(interaction.user.id);
-    await incrementUserThrows(interaction.user.id);
-
     await interaction.editReply(
       `<@${interaction.user.id}> threw a 🍌 at <@${target.id}> :drum:`,
     );
 
-    setTimeout(async () => {
-      if (willHit) {
-        await interaction.followUp(
-          `:boom: <@${target.id}> was hit by the banana!`,
-        );
-        await giveBanana(interaction.user.id, -1);
-        await giveBanana(target.id, 1);
-        return;
-      }
-      // Missed
-      const bananaGone = Math.random() < 0.25;
-      const outcome = Math.random() < 0.5 ? "jumped over" : "dodged under";
-      let message = `:dash: <@${target.id}> ${outcome} the banana!`;
-      if (bananaGone) {
-        await giveBanana(interaction.user.id, -1);
-        message += `\nThe :banana: is gone!`;
-      }
-      await interaction.followUp(message);
-    }, Math.random() * 3000);
-    return;
+    if (Math.random() < 0.5) {
+      await interaction.followUp(
+        `:boom: <@${target.id}> was hit by the banana!`,
+      );
+      await giveBanana(interaction.user.id, -1);
+      await giveBanana(target.id, 1);
+      return;
+    }
+    // Missed
+    const bananaGone = Math.random() < 0.25;
+    const outcome = Math.random() < 0.5 ? "jumped over" : "dodged under";
+    let message = `:dash: <@${target.id}> ${outcome} the banana!`;
+    if (bananaGone) {
+      await giveBanana(interaction.user.id, -1);
+      message += `\nThe :banana: is gone!`;
+    }
+    await interaction.followUp(message);
   },
 };
